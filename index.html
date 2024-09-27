@@ -57,14 +57,6 @@
             background-color: #45a049;
         }
 
-        .cart-section {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f7f7f7;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -86,121 +78,34 @@
             background-color: rgba(0, 0, 0, 0.3);
         }
 
-        .remove-btn {
-            background-color: red;
-            color: white;
-            width: 80px;
-        }
-
         @media print {
             body {
-                background: white;
+                visibility: hidden;
             }
 
-            .container {
-                background: none;
+            #salesTableContainer, #totalContainer, #printHeader {
+                visibility: visible;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
             }
 
             .no-print {
                 display: none;
             }
+        }
 
-            #salesTableContainer {
-                display: block;
-            }
+        /* For displaying place and date in print */
+        #printHeader {
+            text-align: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>House of Curries</h1>
-        <div class="form-group">
-            <label for="saleDate">Sale Date:</label>
-            <input type="date" id="saleDate" name="sale_date">
-        </div>
-
-        <div class="form-group">
-            <label for="placeSelect">Select Place:</label>
-            <select id="placeSelect">
-                <option value="miyapur">Miyapur</option>
-                <option value="ameerpet">Ameerpet</option>
-                <option value="oldcity">Old City</option>
-            </select>
-        </div>
-
-      <div class="form-group">
-            <label for="currySelect">Select Curry:</label>
-            <select id="currySelect" onchange="filterCurryOptions()">
-                <optgroup label="Rice">
-                    <option value="Veg Biriyani">Veg Biriyani</option>
-                    <option value="Rice">Rice</option>
-                </optgroup>
-                <optgroup label="Starters">
-                    <option value="Cashew Fry">Cashew Fry</option>
-                    <option value="Leg Piece">Leg Piece</option>
-                    <option value="Chapathi">Chapathi</option>
-                </optgroup>
-                <optgroup label="Vegetarian Curries">
-                    <option value="Brinjal">Brinjal Curry</option>
-                    <option value="Potato">Potato Curry</option>
-                    <option value="Lady Finger">Lady Finger Curry</option>
-                    <option value="Cabbage Fry">Cabbage Fry</option>
-                    <option value="Paneer">Paneer Curry</option>
-                    <option value="Dal">Pappu</option>
-                    <option value="Masala">Masala Curry</option>
-                    <option value="Dondakai">Dondakai</option>
-                    <option value="Chutney">Chutney</option>
-                    <option value="Sambar">Sambar</option>
-                    <option value="Rasam">Rasam</option>
-                </optgroup>
-                <optgroup label="Non-Vegetarian Curries">
-                    <option value="Mutton">Mutton Curry</option>
-                    <option value="Prawns">Prawns Curry</option>
-                    <option value="Crab">Crab Fry (Pithalu)</option>
-                    <option value="Chicken">Chicken Curry</option>
-                    <option value="Fish">Fish Curry</option>
-                    <option value="Boti">Boti</option>
-                    <option value="Boti Fry">Boti Fry</option>
-                    <option value="Liver Fry">Liver Fry</option>
-                </optgroup>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="quantity">Quantity Sold (in kgs):</label>
-            <input type="number" id="quantity" min="1" value="1">
-        </div>
-
-        <div class="form-group">
-            <label for="leftover">Leftover Quantity (in kgs):</label>
-            <input type="number" id="leftover" min="0" value="0">
-        </div>
-
-        <div class="form-group">
-            <label for="unitsPerPacket">Units per Packet (in grams):</label>
-            <input type="number" id="unitsPerPacket" min="1" value="100">
-        </div>
-
-        <div class="form-group">
-            <label for="price">Price per Packet (in ₹):</label>
-            <input type="number" id="price" min="0" placeholder="Enter price for the selected curry">
-        </div>
-
-        <button class="save-btn" onclick="addToCart()">Add to Cart</button>
-
-        <div id="cart">
-            <h2 class="section-heading">Cart</h2>
-
-            <h3>Miyapur</h3>
-            <ul id="cartMiyapur"></ul>
-
-            <h3>Ameerpet</h3>
-            <ul id="cartAmeerpet"></ul>
-
-            <h3>Old City</h3>
-            <ul id="cartOldCity"></ul>
-        </div>
-
-        <button class="save-btn" onclick="saveSalesData()">Save Sales Data</button>
 
         <!-- History Section -->
         <div class="form-group">
@@ -220,6 +125,12 @@
 
         <button class="save-btn" onclick="showHistory()">Show History</button>
 
+        <!-- Print Header (Hidden until print) -->
+        <div id="printHeader" style="display: none;">
+            <h2>Sales History for <span id="printPlace"></span></h2>
+            <h3>Date: <span id="printDate"></span></h3>
+        </div>
+
         <div id="salesTableContainer" style="margin-top: 20px;">
             <table id="salesTable">
                 <thead>
@@ -235,116 +146,16 @@
                     <!-- Sales data will be dynamically inserted here -->
                 </tbody>
             </table>
+            <div id="totalContainer">
+                <h3>Total for <span id="selectedPlace"></span>: ₹<span id="selectedPlaceTotal">0</span></h3>
+                <h3>Overall Total: ₹<span id="overallTotal">0</span></h3>
+            </div>
         </div>
 
         <button class="save-btn" onclick="printHistoryTable()">Print History</button>
     </div>
 
     <script>
-        let cartMiyapur = JSON.parse(localStorage.getItem("cartMiyapur")) || [];
-        let cartAmeerpet = JSON.parse(localStorage.getItem("cartAmeerpet")) || [];
-        let cartOldCity = JSON.parse(localStorage.getItem("cartOldCity")) || [];
-
-        function addToCart() {
-            const placeSelect = document.getElementById("placeSelect").value;
-            const curryName = document.getElementById("currySelect").options[document.getElementById("currySelect").selectedIndex].text;
-            const quantity = parseFloat(document.getElementById("quantity").value); // in kgs
-            const leftover = parseFloat(document.getElementById("leftover").value); // in kgs
-            const price = parseFloat(document.getElementById("price").value); // price per packet
-
-            const cartItem = {
-                curry: curryName,
-                quantity,
-                leftover,
-                price,
-                totalPrice: (quantity - leftover) * price
-            };
-
-            if (placeSelect === "miyapur") {
-                cartMiyapur.push(cartItem);
-                localStorage.setItem("cartMiyapur", JSON.stringify(cartMiyapur));
-                renderCart("Miyapur");
-            } else if (placeSelect === "ameerpet") {
-                cartAmeerpet.push(cartItem);
-                localStorage.setItem("cartAmeerpet", JSON.stringify(cartAmeerpet));
-                renderCart("Ameerpet");
-            } else if (placeSelect === "oldcity") {
-                cartOldCity.push(cartItem);
-                localStorage.setItem("cartOldCity", JSON.stringify(cartOldCity));
-                renderCart("Old City");
-            }
-        }
-
-        function renderCart(place) {
-            let cart = [];
-            if (place === "Miyapur") {
-                cart = cartMiyapur;
-            } else if (place === "Ameerpet") {
-                cart = cartAmeerpet;
-            } else if (place === "Old City") {
-                cart = cartOldCity;
-            }
-
-            const cartElement = document.getElementById(`cart${place}`);
-            cartElement.innerHTML = ""; // Clear the cart
-
-            cart.forEach((item, index) => {
-                const cartItem = document.createElement("li");
-                cartItem.innerHTML = `
-                    ${item.curry} - ${item.quantity} kg, ₹${item.price} (Leftover: ${item.leftover} kg) 
-                    <button class="remove-btn" onclick="removeFromCart('${place}', ${index})">Remove</button>
-                `;
-                cartElement.appendChild(cartItem);
-            });
-        }
-
-        function removeFromCart(place, index) {
-            if (place === "Miyapur") {
-                cartMiyapur.splice(index, 1);
-                localStorage.setItem("cartMiyapur", JSON.stringify(cartMiyapur));
-                renderCart("Miyapur");
-            } else if (place === "Ameerpet") {
-                cartAmeerpet.splice(index, 1);
-                localStorage.setItem("cartAmeerpet", JSON.stringify(cartAmeerpet));
-                renderCart("Ameerpet");
-            } else if (place === "Old City") {
-                cartOldCity.splice(index, 1);
-                localStorage.setItem("cartOldCity", JSON.stringify(cartOldCity));
-                renderCart("Old City");
-            }
-        }
-
-        function saveSalesData() {
-            const saleDate = document.getElementById("saleDate").value;
-            if (!saleDate) {
-                alert("Please select a date.");
-                return;
-            }
-
-            const salesData = {
-                date: saleDate,
-                miyapur: cartMiyapur,
-                ameerpet: cartAmeerpet,
-                oldcity: cartOldCity
-            };
-
-            const allSalesData = JSON.parse(localStorage.getItem("salesHistory")) || [];
-            allSalesData.push(salesData);
-            localStorage.setItem("salesHistory", JSON.stringify(allSalesData));
-
-            // Clear the cart after saving
-            cartMiyapur = [];
-            cartAmeerpet = [];
-            cartOldCity = [];
-            localStorage.removeItem("cartMiyapur");
-            localStorage.removeItem("cartAmeerpet");
-            localStorage.removeItem("cartOldCity");
-            renderCart("Miyapur");
-            renderCart("Ameerpet");
-            renderCart("Old City");
-            alert("Sales data saved successfully!");
-        }
-
         function showHistory() {
             const historyDate = document.getElementById("historyDate").value;
             const historyPlace = document.getElementById("historyPlace").value;
@@ -360,6 +171,9 @@
             const salesTable = document.getElementById("salesTable").getElementsByTagName("tbody")[0];
             salesTable.innerHTML = ""; // Clear table
 
+            let overallTotal = 0;
+            let selectedPlaceTotal = 0;
+
             if (salesForDate) {
                 const places = ["miyapur", "ameerpet", "oldcity"];
                 places.forEach(place => {
@@ -373,22 +187,40 @@
                                 <td>₹${item.price}</td>
                                 <td>₹${item.totalPrice}</td>
                             `;
+                            overallTotal += item.totalPrice;
+
+                            if (historyPlace === place || historyPlace === "all") {
+                                selectedPlaceTotal += item.totalPrice;
+                            }
                         });
                     }
                 });
             } else {
                 alert("No sales data found for this date.");
             }
+
+            // Update totals in UI
+            document.getElementById("overallTotal").innerText = overallTotal;
+            document.getElementById("selectedPlace").innerText = historyPlace === "all" ? "All Places" : historyPlace.charAt(0).toUpperCase() + historyPlace.slice(1);
+            document.getElementById("selectedPlaceTotal").innerText = selectedPlaceTotal;
         }
 
         function printHistoryTable() {
-            window.print();
-        }
+            const historyPlace = document.getElementById("historyPlace").value;
+            const historyDate = document.getElementById("historyDate").value;
+            
+            // Update the print header with place and date
+            document.getElementById("printPlace").innerText = historyPlace === "all" ? "All Places" : historyPlace.charAt(0).toUpperCase() + historyPlace.slice(1);
+            document.getElementById("printDate").innerText = historyDate;
 
-        // On load, render the cart
-        renderCart("Miyapur");
-        renderCart("Ameerpet");
-        renderCart("Old City");
+            // Show the print header
+            document.getElementById("printHeader").style.display = "block";
+
+            window.print();
+
+            // Hide the print header after printing
+            document.getElementById("printHeader").style.display = "none";
+        }
     </script>
 </body>
 </html>
