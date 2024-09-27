@@ -262,7 +262,10 @@
                 return;
             }
 
-            const total = quantity * price;
+          const soldQuantityInGrams = (Math.max(0, quantity - leftover)) * 1000; // converting kg to grams
+            const numPackets = soldQuantityInGrams / unitsPerPacket; // total number of packets
+            const total = numPackets * price; // total price based on number of packets
+
 
             const saleData = {
                 place: placeSelect,
@@ -279,7 +282,7 @@
             } else if (placeSelect === "ameerpet") {
                 cartAmeerpet.push(saleData);
                 displayCart("Ameerpet", cartAmeerpet);
-            } else {
+            } else if {
                 cartOldCity.push(saleData);
                 displayCart("Old City", cartOldCity);
             }
