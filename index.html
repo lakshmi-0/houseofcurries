@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
     <title>House of Curries</title>
     <style>
         body {
@@ -116,7 +116,7 @@
         <h1>House of Curries</h1>
         <div class="form-group">
             <label for="saleDate">Sale Date:</label>
-            <input type="date" id="saleDate" name="sale_date">
+            <input type="date" id="saleDate" name="sale_date" onchange="updateSelectedDate()">
         </div>
 
         <div class="form-group">
@@ -245,17 +245,19 @@
         let cartMiyapur = [];
         let cartAmeerpet = [];
         let cartOldCity = [];
+        let selectedDate = ""; // Variable to store selected date
+
+        function updateSelectedDate() {
+            selectedDate = document.getElementById("saleDate").value; // Store the selected date
+        }
 
         function addToCart() {
             const placeSelect = document.getElementById("placeSelect").value;
             const curryName = document.getElementById("currySelect").options[document.getElementById("currySelect").selectedIndex].text;
-            const quantity = parseFloat(document.getElementById("quantity").value); // in kgs
-            const leftover = parseFloat(document.getElementById("leftover").value); // in kgs
-            const unitsPerPacket = parseFloat(document.getElementById("unitsPerPacket").value); // in grams
-            const price = parseFloat(document.getElementById("price").value); // price per packet
-            const saleDate = document.getElementById("saleDate").value;
+            const quantity = document.getElementById("quantity").value;
+            const price = document.getElementById("price").value;
 
-            if (!placeSelect || !curryName || !quantity || !price) {
+            if (!placeSelect || !curryName || !quantity || !price || !selectedDate) {
                 alert("Please fill in all fields.");
                 return;
             }
@@ -268,7 +270,7 @@
                 quantity,
                 price,
                 total,
-                date: saleDate
+                date: selectedDate // Use the stored date
             };
 
             if (placeSelect === "miyapur") {
@@ -316,7 +318,6 @@
             document.getElementById("leftover").value = 0;
             document.getElementById("unitsPerPacket").value = 100;
             document.getElementById("price").value = "";
-            document.getElementById("saleDate").value = "";
         }
 
         function saveSalesData() {
@@ -356,20 +357,11 @@
             // Add totals to the last row
             if (totalAllPlaces > 0) {
                 const totalRow = salesTableBody.insertRow();
-                totalRow.insertCell(0).textContent = "Total (All Places)";
+                totalRow.insertCell(0).textContent = "Total";
                 totalRow.insertCell(1).textContent = "";
                 totalRow.insertCell(2).textContent = "";
                 totalRow.insertCell(3).textContent = "";
-                totalRow.insertCell(4).textContent = `₹${totalAllPlaces}`;
-
-                if (placeSelected !== "all") {
-                    const selectedTotalRow = salesTableBody.insertRow();
-                    selectedTotalRow.insertCell(0).textContent = `Total (${placeSelected})`;
-                    selectedTotalRow.insertCell(1).textContent = "";
-                    selectedTotalRow.insertCell(2).textContent = "";
-                    selectedTotalRow.insertCell(3).textContent = "";
-                    selectedTotalRow.insertCell(4).textContent = `₹${totalSelectedPlace}`;
-                }
+                totalRow.insertCell(4).textContent = `₹${totalSelectedPlace}`; // Display only selected place total
             }
         }
 
@@ -386,6 +378,8 @@
             const salesTableBody = document.getElementById("salesTable").getElementsByTagName("tbody")[0];
             const rows = salesTableBody.rows;
 
+            let totalForPrint = 0;
+
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
                 if (placeSelected === "all" || row.cells[0].textContent === placeSelected) {
@@ -394,7 +388,16 @@
                         printWindow.document.write(`<td>${row.cells[j].textContent}</td>`);
                     }
                     printWindow.document.write('</tr>');
+
+                    if (row.cells[0].textContent === placeSelected) {
+                        totalForPrint += parseFloat(row.cells[4].textContent.replace('₹', '').replace(',', ''));
+                    }
                 }
+            }
+
+            // Print total for selected place
+            if (placeSelected !== "all" && totalForPrint > 0) {
+                printWindow.document.write('<tr><td colspan="4" style="text-align:right;"><strong>Total</strong></td><td>₹' + totalForPrint + '</td></tr>');
             }
 
             printWindow.document.write('</tbody></table>');
