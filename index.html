@@ -122,9 +122,9 @@
         <div class="form-group">
             <label for="placeSelect">Select Place:</label>
             <select id="placeSelect">
-                <option value="miyapur">Miyapur</option>
-                <option value="ameerpet">Ameerpet</option>
-                <option value="oldcity">Old City</option>
+                <option value="jubileeHills">Jubilee Hills</option>
+                <option value="gachibowli">Gachibowli</option>
+                <option value="secunderabad">Secunderabad</option>
             </select>
         </div>
 
@@ -191,14 +191,14 @@
         <div id="cart">
             <h2 class="section-heading">Cart</h2>
 
-            <h3>Miyapur</h3>
-            <ul id="cartMiyapur"></ul>
+            <h3>Jubilee Hills</h3>
+            <ul id="cartJubileeHills"></ul>
 
-            <h3>Ameerpet</h3>
-            <ul id="cartAmeerpet"></ul>
+            <h3>Gachibowli</h3>
+            <ul id="cartGachibowli"></ul>
 
-            <h3>Old City</h3>
-            <ul id="cartOldCity"></ul>
+            <h3>Secunderabad</h3>
+            <ul id="cartSecunderabad"></ul>
         </div>
 
         <button class="save-btn" onclick="saveSalesData()">Save Sales Data</button>
@@ -213,9 +213,9 @@
             <label for="historyPlace">Select Place for Printing History:</label>
             <select id="historyPlace">
                 <option value="all">All</option>
-                <option value="miyapur">Miyapur</option>
-                <option value="ameerpet">Ameerpet</option>
-                <option value="oldcity">Old City</option>
+                <option value="jubileeHills">Jubilee Hills</option>
+                <option value="gachibowli">Gachibowli</option>
+                <option value="secunderabad">Secunderabad</option>
             </select>
         </div>
 
@@ -242,9 +242,9 @@
     </div>
 
     <script>
-        let cartMiyapur = [];
-        let cartAmeerpet = [];
-        let cartOldCity = [];
+        let cartJubileeHills = [];
+        let cartGachibowli = [];
+        let cartSecunderabad = [];
         let selectedDate = ""; // Variable to store selected date
 
         function updateSelectedDate() {
@@ -253,38 +253,45 @@
 
         function addToCart() {
             const placeSelect = document.getElementById("placeSelect").value;
-            const curryName = document.getElementById("currySelect").options[document.getElementById("currySelect").selectedIndex].text;
-            const quantity = document.getElementById("quantity").value;
-            const price = document.getElementById("price").value;
+            const currySelect = document.getElementById("currySelect");
+            const curryName = currySelect.options[currySelect.selectedIndex].text;
+            const quantity = parseFloat(document.getElementById("quantity").value);
+            const leftover = parseFloat(document.getElementById("leftover").value);
+            const unitsPerPacket = parseFloat(document.getElementById("unitsPerPacket").value);
+            const price = parseFloat(document.getElementById("price").value);
 
-            if (!placeSelect || !curryName || !quantity || !price || !selectedDate) {
-                alert("Please fill in all fields.");
+            if (!placeSelect || !curryName || isNaN(quantity) || isNaN(leftover) || isNaN(unitsPerPacket) || isNaN(price) || !selectedDate) {
+                alert("Please fill in all fields correctly.");
                 return;
             }
 
-          const soldQuantityInGrams = (Math.max(0, quantity - leftover)) * 1000; // converting kg to grams
-            const numPackets = soldQuantityInGrams / unitsPerPacket; // total number of packets
+            const soldQuantityInGrams = Math.max(0, (quantity - leftover)) * 1000; // converting kg to grams
+            const numPackets = Math.floor(soldQuantityInGrams / unitsPerPacket); // total number of packets
             const total = numPackets * price; // total price based on number of packets
 
+            if (numPackets <= 0) {
+                alert("Sold quantity is too low to form a packet.");
+                return;
+            }
 
             const saleData = {
                 place: placeSelect,
                 curry: curryName,
-                quantity,
-                price,
-                total,
+                quantity: quantity,
+                price: price,
+                total: total,
                 date: selectedDate // Use the stored date
             };
 
-            if (placeSelect === "miyapur") {
-                cartMiyapur.push(saleData);
-                displayCart("Miyapur", cartMiyapur);
-            } else if (placeSelect === "ameerpet") {
-                cartAmeerpet.push(saleData);
-                displayCart("Ameerpet", cartAmeerpet);
-            } else if {
-                cartOldCity.push(saleData);
-                displayCart("Old City", cartOldCity);
+            if (placeSelect === "jubileeHills") {
+                cartJubileeHills.push(saleData);
+                displayCart("JubileeHills", cartJubileeHills);
+            } else if (placeSelect === "gachibowli") {
+                cartGachibowli.push(saleData);
+                displayCart("Gachibowli", cartGachibowli);
+            } else if (placeSelect === "secunderabad") {
+                cartSecunderabad.push(saleData);
+                displayCart("Secunderabad", cartSecunderabad);
             }
 
             clearForm();
@@ -303,15 +310,15 @@
         }
 
         function removeFromCart(place, index) {
-            if (place === "Miyapur") {
-                cartMiyapur.splice(index, 1);
-                displayCart("Miyapur", cartMiyapur);
-            } else if (place === "Ameerpet") {
-                cartAmeerpet.splice(index, 1);
-                displayCart("Ameerpet", cartAmeerpet);
-            } else {
-                cartOldCity.splice(index, 1);
-                displayCart("Old City", cartOldCity);
+            if (place === "JubileeHills") {
+                cartJubileeHills.splice(index, 1);
+                displayCart("JubileeHills", cartJubileeHills);
+            } else if (place === "Gachibowli") {
+                cartGachibowli.splice(index, 1);
+                displayCart("Gachibowli", cartGachibowli);
+            } else if (place === "Secunderabad") {
+                cartSecunderabad.splice(index, 1);
+                displayCart("Secunderabad", cartSecunderabad);
             }
         }
 
@@ -325,7 +332,27 @@
 
         function saveSalesData() {
             // Here you would typically send the data to your server
-            alert("Sales data saved!");
+            // For simulation, we'll store it in localStorage
+            const allSales = JSON.parse(localStorage.getItem('allSales')) || [];
+
+            const salesData = [
+                ...cartJubileeHills.map(item => ({ ...item })),
+                ...cartGachibowli.map(item => ({ ...item })),
+                ...cartSecunderabad.map(item => ({ ...item }))
+            ];
+
+            allSales.push(...salesData);
+            localStorage.setItem('allSales', JSON.stringify(allSales));
+
+            // Clear the carts after saving
+            cartJubileeHills = [];
+            cartGachibowli = [];
+            cartSecunderabad = [];
+            displayCart("JubileeHills", cartJubileeHills);
+            displayCart("Gachibowli", cartGachibowli);
+            displayCart("Secunderabad", cartSecunderabad);
+
+            alert("Sales data saved successfully!");
         }
 
         function showHistory() {
@@ -335,36 +362,48 @@
             const salesTableBody = document.getElementById("salesTable").getElementsByTagName("tbody")[0];
             salesTableBody.innerHTML = ""; // Clear previous history
 
-            let totalAllPlaces = 0;
             let totalSelectedPlace = 0;
 
-            const salesData = [...cartMiyapur, ...cartAmeerpet, ...cartOldCity];
+            const allSales = JSON.parse(localStorage.getItem('allSales')) || [];
 
-            salesData.forEach(item => {
-                if (item.date === dateSelected && (placeSelected === "all" || item.place === placeSelected)) {
-                    const row = salesTableBody.insertRow();
-                    row.insertCell(0).textContent = item.place;
-                    row.insertCell(1).textContent = item.curry;
-                    row.insertCell(2).textContent = item.quantity;
-                    row.insertCell(3).textContent = item.price;
-                    row.insertCell(4).textContent = `₹${item.total}`;
+            const filteredSales = allSales.filter(item => {
+                return item.date === dateSelected && (placeSelected === "all" || item.place === placeSelected);
+            });
 
-                    totalAllPlaces += item.total;
+            filteredSales.forEach(item => {
+                const row = salesTableBody.insertRow();
+                row.insertCell(0).textContent = formatPlaceName(item.place);
+                row.insertCell(1).textContent = item.curry;
+                row.insertCell(2).textContent = item.quantity;
+                row.insertCell(3).textContent = `₹${item.price}`;
+                row.insertCell(4).textContent = `₹${item.total}`;
 
-                    if (item.place === placeSelected || placeSelected === "all") {
-                        totalSelectedPlace += item.total;
-                    }
-                }
+                totalSelectedPlace += item.total;
             });
 
             // Add totals to the last row
-            if (totalAllPlaces > 0) {
+            if (filteredSales.length > 0) {
                 const totalRow = salesTableBody.insertRow();
                 totalRow.insertCell(0).textContent = "Total";
                 totalRow.insertCell(1).textContent = "";
                 totalRow.insertCell(2).textContent = "";
                 totalRow.insertCell(3).textContent = "";
-                totalRow.insertCell(4).textContent = `₹${totalSelectedPlace}`; // Display only selected place total
+                totalRow.insertCell(4).textContent = `₹${totalSelectedPlace}`;
+            } else {
+                alert("No sales data found for the selected date and place.");
+            }
+        }
+
+        function formatPlaceName(placeValue) {
+            switch(placeValue) {
+                case "jubileeHills":
+                    return "Jubilee Hills";
+                case "gachibowli":
+                    return "Gachibowli";
+                case "secunderabad":
+                    return "Secunderabad";
+                default:
+                    return placeValue;
             }
         }
 
@@ -372,37 +411,20 @@
             const placeSelected = document.getElementById("historyPlace").value;
             const saleDate = document.getElementById("historyDate").value;
 
+            const salesTableBody = document.getElementById("salesTable").getElementsByTagName("tbody")[0];
+            if (salesTableBody.innerHTML.trim() === "") {
+                alert("No data to print. Please generate the history first.");
+                return;
+            }
+
             const printWindow = window.open('', '', 'height=600,width=800');
             printWindow.document.write('<html><head><title>Sales History</title>');
+            printWindow.document.write('<style> table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #000; padding: 8px; text-align: left; } </style>');
             printWindow.document.write('</head><body>');
-            printWindow.document.write(`<h1>Sales History - ${placeSelected} on ${saleDate}</h1>`);
-            printWindow.document.write('<table border="1"><thead><tr><th>Place</th><th>Curry</th><th>Quantity (kg)</th><th>Price (₹)</th><th>Total (₹)</th></tr></thead><tbody>');
-
-            const salesTableBody = document.getElementById("salesTable").getElementsByTagName("tbody")[0];
-            const rows = salesTableBody.rows;
-
-            let totalForPrint = 0;
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                if (placeSelected === "all" || row.cells[0].textContent === placeSelected) {
-                    printWindow.document.write('<tr>');
-                    for (let j = 0; j < row.cells.length; j++) {
-                        printWindow.document.write(`<td>${row.cells[j].textContent}</td>`);
-                    }
-                    printWindow.document.write('</tr>');
-
-                    if (row.cells[0].textContent === placeSelected) {
-                        totalForPrint += parseFloat(row.cells[4].textContent.replace('₹', '').replace(',', ''));
-                    }
-                }
-            }
-
-            // Print total for selected place
-            if (placeSelected !== "all" && totalForPrint > 0) {
-                printWindow.document.write('<tr><td colspan="4" style="text-align:right;"><strong>Total</strong></td><td>₹' + totalForPrint + '</td></tr>');
-            }
-
+            printWindow.document.write(`<h1>Sales History - ${placeSelected === "all" ? "All Places" : formatPlaceName(placeSelected)} on ${saleDate}</h1>`);
+            printWindow.document.write('<table>');
+            printWindow.document.write('<thead><tr><th>Place</th><th>Curry</th><th>Quantity (kg)</th><th>Price (₹)</th><th>Total (₹)</th></tr></thead><tbody>');
+            printWindow.document.write(salesTableBody.innerHTML);
             printWindow.document.write('</tbody></table>');
             printWindow.document.write('</body></html>');
             printWindow.document.close();
