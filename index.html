@@ -91,6 +91,25 @@
             color: white;
             width: 80px;
         }
+   .plus-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #45a049;
+            color: white;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            border: none;
+        }
+
+        .plus-box:hover {
+            background-color: #388e3c;
+        }
+
 
         @media print {
             body {
@@ -130,6 +149,7 @@
 
         <div class="form-group">
             <label for="currySelect">Select Curry:</label>
+             <div style="display: flex; gap: 10px;">
             <select id="currySelect">
                 <optgroup label="Rice">
                     <option value="Veg Biriyani">Veg Biriyani</option>
@@ -165,6 +185,8 @@
                 </optgroup>
             </select>
         </div>
+           <button type="button" class="plus-box" onclick="addNewCurry()">+</button>
+  </div>
 
         <div class="form-group">
             <label for="quantity">Quantity Sold (in kgs):</label>
@@ -308,6 +330,27 @@
                 cartList.appendChild(li);
             });
         }
+ function addNewCurry() {
+            const newCurry = prompt("Enter the name of the new curry:");
+            if (newCurry) {
+                const currySelect = document.getElementById("currySelect");
+
+                const newOption = document.createElement("option");
+                newOption.value = newCurry.replace(/\s+/g, '').toLowerCase();
+                newOption.textContent = newCurry;
+
+                let optgroup = currySelect.querySelector("optgroup[label='Custom Curries']");
+                if (!optgroup) {
+                    optgroup = document.createElement("optgroup");
+                    optgroup.label = "Custom Curries";
+                    currySelect.appendChild(optgroup);
+                }
+
+                optgroup.appendChild(newOption);
+            }
+        }
+
+
 
         function removeFromCart(place, index) {
             if (place === "JubileeHills") {
